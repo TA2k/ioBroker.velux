@@ -68,8 +68,11 @@
 		]
 	},
 	"native": {
-		"option1": true,
-		"option2": "42"
+		"user": "",
+		"password": "",
+		"atoken": "",
+		"rtoken": "",
+		"homeid": ""
 	},
 	"objects": [],
 	"instanceObjects": [
