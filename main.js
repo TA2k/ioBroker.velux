@@ -28,6 +28,7 @@ class Velux extends utils.Adapter {
 
 
 		this.refreshTokenInterval = null;
+		this.updateInterval = null;
 	}
 
 	/**
@@ -41,18 +42,21 @@ class Velux extends utils.Adapter {
 			this.log.debug("Login successful");
 			this.setState("info.connection", true, true);
 			this.getHomesData().then(() => {
-				// this.getHomesStatus().then(() => {	});
-				/*this.setVeluxState({
-					home: {
-						id: "5da6",
-						modules: [{
-							retrieve_key: true,
-							id: "70:ee",
-							bridge: "70:ee"
-						}]
-					},
-					app_version: "1.6.0"
-				});*/
+				this.getHomesStatus().then(() => {});
+				this.updateInterval = setInterval(() => {
+					this.getHomesStatus();
+				}, this.config.interval * 60 * 1000)
+				// this.setVeluxState({
+				// 	home: {
+				// 		id: this.config.homeId,
+				// 		modules: [{
+				// 			retrieve_key: true,
+				// 			id: this.config.bridgeId,
+				// 			bridge: this.config.bridgeId
+				// 		}]
+				// 	},
+				// 	app_version: "1.6.0"
+				// });
 			});
 		});
 
@@ -75,7 +79,7 @@ class Velux extends utils.Adapter {
 		// });
 
 		// in this template all states changes inside the adapters namespace are subscribed
-		this.subscribeStates("*");
+		//this.subscribeStates("*");
 
 		/*
 		setState examples
@@ -132,6 +136,7 @@ class Velux extends utils.Adapter {
 					const tokens = JSON.parse(body);
 					this.config.atoken = tokens.access_token;
 					this.config.rtoken = tokens.refresh_token;
+					resolve();
 
 				} catch (error) {
 					this.log.error(error);
@@ -201,14 +206,92 @@ class Velux extends utils.Adapter {
 					reject();
 				}
 				try {
-					const homeData = JSON.parse(body);
+					if (body.error) {
+						this.log.error(JSON.stringify(body.error));
+						reject();
+					}
 					const adapter = this;
-					traverse(homeData).forEach(function (value) {
-						adapter.log.info(this);
-						adapter.log.info(value);
+					if (body.body && body.body.homes) {
 
-					});
-					this.config.homeId = "5da";
+						this.config.homeId = body.body.homes[0].id;
+						this.config.bridgeId = body.body.homes[0].modules[0].id;
+						traverse(body.body.homes).forEach(function (value) {
+							if (this.path.length > 0 && this.isLeaf) {
+								const modPath = this.path;
+								this.path.forEach((pathElement, pathIndex) => {
+									if (!isNaN(parseInt(pathElement))) {
+										let stringPathIndex = parseInt(pathElement) + 1 + "";
+										while (stringPathIndex.length < 2) stringPathIndex = "0" + stringPathIndex;
+										const key = this.path[pathIndex - 1] + stringPathIndex;
+										const parentIndex = modPath.indexOf(pathElement) - 1;
+										//if (this.key === pathElement) {
+										modPath[parentIndex] = key;
+										//}
+										modPath.splice(parentIndex + 1, 1);
+									}
+								});
+								adapter.setObjectNotExists("home." + modPath.join("."), {
+									type: "state",
+									common: {
+										name: this.key,
+										role: "indicator",
+										type: "mixed",
+										write: false,
+										read: true
+									},
+									native: {}
+								});
+								adapter.setState("home." + modPath.join("."), value || this.node, true);
+							} else if (this.path.length > 0 && !isNaN(this.path[this.path.length - 1])) {
+								const modPath = this.path;
+								this.path.forEach((pathElement, pathIndex) => {
+									if (!isNaN(parseInt(pathElement))) {
+										let stringPathIndex = parseInt(pathElement) + 1 + "";
+										while (stringPathIndex.length < 2) stringPathIndex = "0" + stringPathIndex;
+										const key = this.path[pathIndex - 1] + stringPathIndex;
+										const parentIndex = modPath.indexOf(pathElement) - 1;
+										//if (this.key === pathElement) {
+										modPath[parentIndex] = key;
+										//}
+										modPath.splice(parentIndex + 1, 1);
+									}
+								});
+						
+									const newPath = modPath.length ? "home.":"home";
+									adapter.setObjectNotExists(newPath + modPath.join("."), {
+										type: "state",
+										common: {
+											name: this.node.name || this.node.id,
+											role: "indicator",
+											type: "mixed",
+											write: false,
+											read: true
+										},
+										native: {}
+									});
+								
+							}
+
+						});
+					}
+					if (body.body && body.body.user) {
+						Object.keys(body.body.user).forEach(key => {
+							this.setObjectNotExists("user." + key, {
+								type: "state",
+								common: {
+									name: key,
+									role: "indicator",
+									type: "mixed",
+									write: false,
+									read: true
+								},
+								native: {}
+							});
+							this.setState("user." + key, body.body.user[key], true);
+
+						});
+					}
+					resolve();
 
 				} catch (error) {
 					this.log.error(error);
@@ -220,7 +303,7 @@ class Velux extends utils.Adapter {
 
 	getHomesStatus() {
 		return new Promise((resolve, reject) => {
-			this.log.debug("getHomesData");
+			this.log.debug("getHomesStatus");
 			request.post({
 				url: "https://app.velux-active.com/syncapi/v1/homestatus",
 				headers: {
@@ -232,7 +315,7 @@ class Velux extends utils.Adapter {
 					"Host": "app.velux-active.com"
 				},
 				body: {
-					home_id: this.config.homeid,
+					home_id: this.config.homeId,
 					app_version: "1.6.0"
 				},
 				json: true,
@@ -243,14 +326,45 @@ class Velux extends utils.Adapter {
 					reject();
 				}
 				try {
-					const homeData = JSON.parse(body);
+					if (body.error) {
+						this.log.error(JSON.stringify(body.error));
+						reject();
+					}
 					const adapter = this;
-					traverse(homeData).forEach(function (value) {
-						adapter.log.info(this);
-						adapter.log.info(value);
+					if (body.body && body.body.home) {
+						traverse(body.body.home).forEach(function (value) {
+							if (this.path.length > 0 && this.isLeaf) {
+								const modPath = this.path;
+								this.path.forEach((pathElement, pathIndex) => {
+									if (!isNaN(parseInt(pathElement))) {
+										let stringPathIndex = parseInt(pathElement) + 1 + "";
+										while (stringPathIndex.length < 2) stringPathIndex = "0" + stringPathIndex;
+										const key = this.path[pathIndex - 1] + stringPathIndex;
+										const parentIndex = modPath.indexOf(pathElement) - 1;
+										//if (this.key === pathElement) {
+										modPath[parentIndex] = key;
+										//}
+										modPath.splice(parentIndex + 1, 1);
+									}
+								});
+								adapter.setObjectNotExists("home." + modPath.join("."), {
+									type: "state",
+									common: {
+										name: this.key,
+										role: "indicator",
+										type: "mixed",
+										write: false,
+										read: true
+									},
+									native: {}
+								});
+								adapter.setState("home." + modPath.join("."), value || this.node, true);
+							}
 
-					});
+						});
+					}
 
+					resolve();
 				} catch (error) {
 					this.log.error(error);
 					reject();
@@ -282,6 +396,7 @@ class Velux extends utils.Adapter {
 				}
 				try {
 					this.log.info(body);
+					resolve();
 
 				} catch (error) {
 					this.log.error(error);
@@ -313,10 +428,10 @@ class Velux extends utils.Adapter {
 	onObjectChange(id, obj) {
 		if (obj) {
 			// The object was changed
-			this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
+			//	this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
 		} else {
 			// The object was deleted
-			this.log.info(`object ${id} deleted`);
+			//	this.log.info(`object ${id} deleted`);
 		}
 	}
 
@@ -328,10 +443,10 @@ class Velux extends utils.Adapter {
 	onStateChange(id, state) {
 		if (state) {
 			// The state was changed
-			this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+			//	this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
 		} else {
 			// The state was deleted
-			this.log.info(`state ${id} deleted`);
+			//	this.log.info(`state ${id} deleted`);
 		}
 	}
 

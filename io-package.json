@@ -1,101 +1,104 @@
 {
-	"common": {
-		"name": "velux",
-		"version": "0.0.1",
-		"news": {
-			"0.0.1": {
-				"en": "initial release",
-				"de": "Erstveröffentlichung",
-				"ru": "Начальная версия",
-				"pt": "lançamento inicial",
-				"nl": "Eerste uitgave",
-				"fr": "Première version",
-				"it": "Versione iniziale",
-				"es": "Versión inicial",
-				"pl": "Pierwsze wydanie",
-				"zh-cn": "首次出版"
-			}
-		},
-		"title": "Velux",
-		"titleLang": {
-			"en": "Velux",
-			"de": "Velux",
-			"ru": "Velux",
-			"pt": "Velux",
-			"nl": "Velux",
-			"fr": "Velux",
-			"it": "Velux",
-			"es": "Velux",
-			"pl": "Velux",
-			"zh-cn": "威乐士"
-		},
-		"desc": {
-			"en": "Adapter for Velux",
-			"de": "Adapter für Velux",
-			"ru": "Адаптер для Velux",
-			"pt": "Adaptador para Velux",
-			"nl": "Adapter voor Velux",
-			"fr": "Adaptateur pour Velux",
-			"it": "Adattatore per Velux",
-			"es": "Adaptador para Velux",
-			"pl": "Adapter do Velux",
-			"zh-cn": "Velux适配器"
-		},
-		"authors": [
-			"ta2k <tombox2020@gmail.com>"
-		],
-		"keywords": [
-			"velux",
-			"KIX 300"
-		],
-		"license": "MIT",
-		"platform": "Javascript/Node.js",
-		"main": "main.js",
-		"icon": "velux.png",
-		"enabled": true,
-		"extIcon": "https://raw.githubusercontent.com/ta2k/ioBroker.velux/master/admin/velux.png",
-		"readme": "https://github.com/ta2k/ioBroker.velux/blob/master/README.md",
-		"loglevel": "info",
-		"mode": "daemon",
-		"type": "household",
-		"compact": true,
-		"materialize": true,
-		"supportCustoms": true,
-		"dependencies": [
-			{
-				"js-controller": ">=1.4.2"
-			}
-		]
-	},
-	"native": {
-		"user": "",
-		"password": "",
-		"atoken": "",
-		"rtoken": "",
-		"homeid": ""
-	},
-	"objects": [],
-	"instanceObjects": [
-		{
-			"_id": "info",
-			"type": "channel",
-			"common": {
-				"name": "Information"
-			},
-			"native": {}
-		},
-		{
-			"_id": "info.connection",
-			"type": "state",
-			"common": {
-				"role": "indicator.connected",
-				"name": "Device or service connected",
-				"type": "boolean",
-				"read": true,
-				"write": false,
-				"def": false
-			},
-			"native": {}
-		}
-	]
+  "common": {
+    "name": "velux",
+    "version": "0.0.1",
+    "news": {
+      "0.0.1": {
+        "en": "initial release",
+        "de": "Erstveröffentlichung",
+        "ru": "Начальная версия",
+        "pt": "lançamento inicial",
+        "nl": "Eerste uitgave",
+        "fr": "Première version",
+        "it": "Versione iniziale",
+        "es": "Versión inicial",
+        "pl": "Pierwsze wydanie",
+        "zh-cn": "首次出版"
+      }
+    },
+    "title": "Velux",
+    "titleLang": {
+      "en": "Velux",
+      "de": "Velux",
+      "ru": "Velux",
+      "pt": "Velux",
+      "nl": "Velux",
+      "fr": "Velux",
+      "it": "Velux",
+      "es": "Velux",
+      "pl": "Velux",
+      "zh-cn": "威乐士"
+    },
+    "desc": {
+      "en": "Adapter for Velux",
+      "de": "Adapter für Velux",
+      "ru": "Адаптер для Velux",
+      "pt": "Adaptador para Velux",
+      "nl": "Adapter voor Velux",
+      "fr": "Adaptateur pour Velux",
+      "it": "Adattatore per Velux",
+      "es": "Adaptador para Velux",
+      "pl": "Adapter do Velux",
+      "zh-cn": "Velux适配器"
+    },
+    "authors": [
+      "ta2k <tombox2020@gmail.com>"
+    ],
+    "keywords": [
+      "velux",
+      "KIX 300"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "main.js",
+    "icon": "velux.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/ta2k/ioBroker.velux/master/admin/velux.png",
+    "readme": "https://github.com/ta2k/ioBroker.velux/blob/master/README.md",
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "household",
+    "compact": true,
+    "materialize": true,
+    "supportCustoms": true,
+    "dependencies": [
+      {
+        "js-controller": ">=1.4.2"
+      }
+    ],
+    "installedFrom": "https://github.com/TA2k/ioBroker.velux/tarball/2e25becf445da5d0c334a8e8660977f9bbb0b5d4"
+  },
+  "native": {
+    "user": "",
+    "password": "",
+    "atoken": "",
+    "rtoken": "",
+    "homeId": "",
+    "bridgeId": "",
+    "interval": 5
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }
