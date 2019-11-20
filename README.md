@@ -12,7 +12,7 @@
 
 ## velux adapter for ioBroker
 
-Adapter for Velux
+Adapter for Velux KIX 300
 
 ## Usage
 
