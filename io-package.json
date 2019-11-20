@@ -1,8 +1,11 @@
 {
   "common": {
     "name": "velux",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "news": {
+      "0.0.2": {
+        "en": "add changing target_position for non windows"
+      },
       "0.0.1": {
         "en": "initial release",
         "de": "Erstveröffentlichung",
@@ -65,8 +68,7 @@
       {
         "js-controller": ">=1.4.2"
       }
-    ],
-    "installedFrom": "https://github.com/TA2k/ioBroker.velux/tarball/2e25becf445da5d0c334a8e8660977f9bbb0b5d4"
+    ]
   },
   "native": {
     "user": "",

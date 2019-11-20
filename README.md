@@ -14,8 +14,15 @@
 
 Adapter for Velux
 
+## Usage
+
+Enter under module your new target_position. Windows allows only target_position 0.
+
 ## Changelog
 
+### 0.0.2
+* add changing target_position for non windows  
+  
 ### 0.0.1
 * (ta2k) initial release
 
