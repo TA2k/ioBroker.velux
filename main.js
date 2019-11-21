@@ -292,6 +292,7 @@ class Velux extends utils.Adapter {
 						reject();
 					}
 					const adapter = this;
+					this.log.debug(JSON.stringify(body))
 					if (body.body && body.body.home) {
 						traverse(body.body.home).forEach(function (value) {
 							if (this.path.length > 0 && this.isLeaf) {
@@ -314,7 +315,7 @@ class Velux extends utils.Adapter {
 										name: this.key,
 										role: "indicator",
 										type: "mixed",
-										write: false,
+										write: true,
 										read: true
 									},
 									native: {}
@@ -347,7 +348,7 @@ class Velux extends utils.Adapter {
 					"Content-Type": "application/json",
 					"Host": "app.velux-active.com"
 				},
-				body: {
+				body: {		
 					home: {
 						modules: [{
 							force: true,
