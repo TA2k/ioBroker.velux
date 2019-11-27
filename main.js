@@ -84,6 +84,7 @@ class Velux extends utils.Adapter {
 					this.log.error(err);
 					reject();
 				}
+				this.log.debug(body)
 				this.refreshTokenInterval = setInterval(() => {
 					this.refreshToken().catch(() => {
 						setTimeout(() => {
@@ -129,6 +130,7 @@ class Velux extends utils.Adapter {
 					reject();
 				}
 				try {
+					this.log.debug(body)
 					const tokens = JSON.parse(body);
 					this.config.atoken = tokens.access_token;
 					this.config.rtoken = tokens.refresh_token;
@@ -172,6 +174,8 @@ class Velux extends utils.Adapter {
 						reject();
 					}
 					const adapter = this;
+
+					this.log.debug(body)
 					if (body.body && body.body.homes) {
 
 						this.config.homeId = body.body.homes[0].id;
