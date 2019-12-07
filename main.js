@@ -313,18 +313,29 @@ class Velux extends utils.Adapter {
 										modPath.splice(parentIndex + 1, 1);
 									}
 								});
+								let role = "indicator";
+								if (this.key === "temperature") {
+									role ="level.temperature";
+								} 
+								if (this.key === "humidity") {
+									role ="value.humidity";
+								} 
 								adapter.setObjectNotExists("home." + modPath.join("."), {
 									type: "state",
 									common: {
 										name: this.key,
-										role: "indicator",
+										role: role,
 										type: "mixed",
 										write: true,
 										read: true
 									},
 									native: {}
 								});
-								adapter.setState("home." + modPath.join("."), value || this.node, true);
+								if (this.key.indexOf("temperature") !== -1) {
+									adapter.setState("home." + modPath.join("."), parseFloat(value) /10, true);
+								} else {
+									adapter.setState("home." + modPath.join("."), value || this.node, true);
+								}
 							}
 
 						});
