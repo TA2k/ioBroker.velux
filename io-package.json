@@ -66,7 +66,6 @@
     "type": "household",
     "compact": true,
     "materialize": true,
-    "supportCustoms": true,
     "dependencies": [
       {
         "js-controller": ">=1.4.2"
