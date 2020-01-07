@@ -42,7 +42,7 @@ class Velux extends utils.Adapter {
 			this.log.debug("Login successful");
 			this.setState("info.connection", true, true);
 			this.getHomesData().then(() => {
-				this.getHomesStatus().then(() => {});
+				this.getHomesStatus().then(() => { });
 				this.updateInterval = setInterval(() => {
 					this.getHomesStatus();
 				}, this.config.interval * 60 * 1000)
@@ -51,7 +51,24 @@ class Velux extends utils.Adapter {
 		});
 
 		this.subscribeStates("*");
-
+		//Delete old room states
+		const pre = this.name + "." + this.instance;
+		this.getStates(pre + ".*", (err, states) => {
+			const allIds = Object.keys(states);
+			allIds.forEach(keyName => {
+				if (
+					keyName.indexOf("home.rooms") !== -1 ||
+					keyName.indexOf("home.modules") !== -1 
+				) {
+					this.delObject(
+						keyName
+							.split(".")
+							.slice(2)
+							.join(".")
+					);
+				}
+			});
+		});
 
 
 	}
@@ -64,7 +81,7 @@ class Velux extends utils.Adapter {
 				headers: {
 					"Accept-Language": "de-DE;q=1, en-DE;q=0.9",
 					"Authorization": "Basic NTkzMTU0ZGZhMTI3ZDk4MWU3NmJkZTM3OjRlZjg0MWVhMTAxNGYxNGJhMzFmZmFmOGY3ZGE2MTE2",
-					"User-Agent": "Velux/1.6.0 (iPhone; iOS 13.2; Scale/3.00)",
+					"User-Agent": "Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)",
 					"Accept": "application/json",
 					"Host": "app.velux-active.com"
 				},
@@ -115,7 +132,7 @@ class Velux extends utils.Adapter {
 				headers: {
 					"Accept-Language": "de-DE;q=1, en-DE;q=0.9",
 					"Authorization": "Basic NTkzMTU0ZGZhMTI3ZDk4MWU3NmJkZTM3OjRlZjg0MWVhMTAxNGYxNGJhMzFmZmFmOGY3ZGE2MTE2",
-					"User-Agent": "Velux/1.6.0 (iPhone; iOS 13.2; Scale/3.00)",
+					"User-Agent": "Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)",
 					"Accept": "application/json",
 					"Host": "app.velux-active.com"
 				},
@@ -151,7 +168,7 @@ class Velux extends utils.Adapter {
 				headers: {
 					"Authorization": "Bearer " + this.config.atoken,
 					"Accept-Language": "de-DE;q=1, en-DE;q=0.9",
-					"User-Agent": "Velux/1.6.0 (iPhone; iOS 13.2; Scale/3.00)",
+					"User-Agent": "Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)",
 					"Accept": "*/*",
 					"Content-Type": "application/json",
 					"Host": "app.velux-active.com"
@@ -159,7 +176,7 @@ class Velux extends utils.Adapter {
 
 				body: {
 					app_type: "app_velux",
-					app_version: "1.6.0"
+					app_version: "1.6.1"
 				},
 				json: true,
 				followAllRedirects: true
@@ -180,14 +197,17 @@ class Velux extends utils.Adapter {
 
 						this.config.homeId = body.body.homes[0].id;
 						this.config.bridgeId = body.body.homes[0].modules[0].id;
+						let currentId
 						traverse(body.body.homes).forEach(function (value) {
 							if (this.path.length > 0 && this.isLeaf) {
 								const modPath = this.path;
+								
 								this.path.forEach((pathElement, pathIndex) => {
 									if (!isNaN(parseInt(pathElement))) {
 										let stringPathIndex = parseInt(pathElement) + 1 + "";
 										while (stringPathIndex.length < 2) stringPathIndex = "0" + stringPathIndex;
 										const key = this.path[pathIndex - 1] + stringPathIndex;
+										
 										const parentIndex = modPath.indexOf(pathElement) - 1;
 										//if (this.key === pathElement) {
 										modPath[parentIndex] = key;
@@ -195,6 +215,14 @@ class Velux extends utils.Adapter {
 										modPath.splice(parentIndex + 1, 1);
 									}
 								});
+								if (modPath[0] && (modPath[0].startsWith("rooms") || modPath[0].startsWith("modules"))) {
+									if(this.parent.node.id ) {
+										modPath[0] = this.parent.node.id 
+										currentId = this.parent.node.id 
+									} else {
+										modPath[0] =currentId;
+									}
+								}
 								adapter.setObjectNotExists("home." + modPath.join("."), {
 									type: "state",
 									common: {
@@ -209,11 +237,13 @@ class Velux extends utils.Adapter {
 								adapter.setState("home." + modPath.join("."), value || this.node, true);
 							} else if (this.path.length > 0 && !isNaN(this.path[this.path.length - 1])) {
 								const modPath = this.path;
+								let keyName
 								this.path.forEach((pathElement, pathIndex) => {
 									if (!isNaN(parseInt(pathElement))) {
 										let stringPathIndex = parseInt(pathElement) + 1 + "";
 										while (stringPathIndex.length < 2) stringPathIndex = "0" + stringPathIndex;
 										const key = this.path[pathIndex - 1] + stringPathIndex;
+										keyName = this.path[pathIndex - 1];
 										const parentIndex = modPath.indexOf(pathElement) - 1;
 										modPath[parentIndex] = key;
 
@@ -222,10 +252,26 @@ class Velux extends utils.Adapter {
 								});
 
 								const newPath = modPath.length ? "home." : "home";
-								adapter.setObjectNotExists(newPath + modPath.join("."), {
-									type: "state",
+								let name = this.node.name
+
+								if (modPath[0] && (modPath[0].startsWith("rooms") || modPath[0].startsWith("modules"))) {
+									if (this.node.id) {
+										modPath[0] = this.node.id 
+										currentId = this.node.id
+									} else {
+										modPath[0] = currentId
+									}
+									if( modPath.length < 3) {
+										name = keyName + " " + this.node.name
+
+									}
+								}
+
+								let newPostPath = modPath.join(".");
+								adapter.setObjectNotExists(newPath + newPostPath, {
+									type: modPath.length ? "state" : "device",
 									common: {
-										name: this.node.name || this.node.id,
+										name: name,
 										role: "indicator",
 										type: "mixed",
 										write: false,
@@ -274,14 +320,14 @@ class Velux extends utils.Adapter {
 				headers: {
 					"Authorization": "Bearer " + this.config.atoken,
 					"Accept-Language": "de-DE;q=1, en-DE;q=0.9",
-					"User-Agent": "Velux/1.6.0 (iPhone; iOS 13.2; Scale/3.00)",
+					"User-Agent": "Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)",
 					"Accept": "*/*",
 					"Content-Type": "application/json",
 					"Host": "app.velux-active.com"
 				},
 				body: {
 					home_id: this.config.homeId,
-					app_version: "1.6.0"
+					app_version: "1.6.1"
 				},
 				json: true,
 				followAllRedirects: true
@@ -298,6 +344,8 @@ class Velux extends utils.Adapter {
 					const adapter = this;
 					this.log.debug(JSON.stringify(body))
 					if (body.body && body.body.home) {
+
+						let currentId;
 						traverse(body.body.home).forEach(function (value) {
 							if (this.path.length > 0 && this.isLeaf) {
 								const modPath = this.path;
@@ -313,28 +361,44 @@ class Velux extends utils.Adapter {
 										modPath.splice(parentIndex + 1, 1);
 									}
 								});
+
+								if (modPath[0] && (modPath[0].startsWith("rooms") || modPath[0].startsWith("modules"))) {
+									if (this.parent.node.id ) {
+										modPath[0] = this.parent.node.id
+										currentId = this.parent.node.id;
+									} else {
+										modPath[0] = currentId
+									}
+									
+								}
+
+								let newPostPath = modPath.join(".");
 								let role = "indicator";
+								let unit = ""
 								if (this.key === "temperature") {
-									role ="level.temperature";
-								} 
+									role = "level.temperature";
+									unit = "°c"
+								}
 								if (this.key === "humidity") {
-									role ="value.humidity";
-								} 
-								adapter.setObjectNotExists("home." + modPath.join("."), {
+									role = "value.humidity";
+									unit = "%"
+								}
+								adapter.setObjectNotExists("home." + newPostPath, {
 									type: "state",
 									common: {
 										name: this.key,
 										role: role,
 										type: "mixed",
 										write: true,
-										read: true
+										read: true,
+										unit: unit
 									},
 									native: {}
 								});
 								if (this.key.indexOf("temperature") !== -1) {
-									adapter.setState("home." + modPath.join("."), parseFloat(value) /10, true);
+									adapter.setState("home." + newPostPath, parseFloat(value) / 10, true);
 								} else {
-									adapter.setState("home." + modPath.join("."), value || this.node, true);
+									adapter.setState("home." + newPostPath, value || this.node, true);
 								}
 							}
 
@@ -358,12 +422,12 @@ class Velux extends utils.Adapter {
 				headers: {
 					"Authorization": "Bearer " + this.config.atoken,
 					"Accept-Language": "de-DE;q=1, en-DE;q=0.9",
-					"User-Agent": "Velux/1.6.0 (iPhone; iOS 13.2; Scale/3.00)",
+					"User-Agent": "Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)",
 					"Accept": "*/*",
 					"Content-Type": "application/json",
 					"Host": "app.velux-active.com"
 				},
-				body: {		
+				body: {
 					home: {
 						modules: [{
 							force: true,
@@ -373,7 +437,7 @@ class Velux extends utils.Adapter {
 						}],
 						id: this.config.homeId
 					},
-					app_version: '1.6.0'
+					app_version: '1.6.1'
 				},
 				json: true,
 				followAllRedirects: true

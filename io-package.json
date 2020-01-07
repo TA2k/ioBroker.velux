@@ -1,8 +1,11 @@
 {
   "common": {
     "name": "velux",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "news": {
+      "0.0.4": {
+        "en": "improve room assignment"
+      },
       "0.0.3": {
         "en": "convert temperature"
       },
