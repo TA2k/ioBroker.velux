@@ -26,6 +26,7 @@ class Velux extends utils.Adapter {
 
         this.refreshTokenInterval = null;
         this.updateInterval = null;
+        this.catchTimeout = null;
     }
 
     /**
@@ -100,7 +101,7 @@ class Velux extends utils.Adapter {
                     }
                     this.refreshTokenInterval = setInterval(() => {
                         this.refreshToken().catch(() => {
-                            setTimeout(() => {
+                            this.catchTimeout = setTimeout(() => {
                                 this.refreshToken();
                             }, 5 * 60 * 1000);
                         });
@@ -471,6 +472,7 @@ class Velux extends utils.Adapter {
 
             clearInterval(this.refreshTokenInterval);
             clearInterval(this.updateInterval);
+            clearTimeout(this.catchTimeout);
             callback();
         } catch (e) {
             callback();
