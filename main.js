@@ -17,7 +17,7 @@ class Velux extends utils.Adapter {
     constructor(options) {
         super({
             ...options,
-            name: "velux"
+            name: "velux",
         });
         this.on("ready", this.onReady.bind(this));
         this.on("stateChange", this.onStateChange.bind(this));
@@ -37,30 +37,39 @@ class Velux extends utils.Adapter {
 
         this.setState("info.connection", false, true);
         // Reset the connection indicator during startup
-        this.login().then(() => {
-            this.log.debug("Login successful");
-            this.setState("info.connection", true, true);
-            this.getHomesData().then(() => {
-                this.getHomesStatus().then(() => {});
-                this.updateInterval = setInterval(() => {
-                    this.getHomesStatus();
-                }, this.config.interval * 60 * 1000);
+        this.login()
+            .then(() => {
+                this.log.debug("Login successful");
+                this.setState("info.connection", true, true);
+                this.getHomesData()
+                    .then(() => {
+                        this.getHomesStatus()
+                            .then(() => {})
+                            .catch(() => {
+                                this.log.error("Get Home Status was not successful");
+                            });
+                        this.updateInterval = setInterval(() => {
+                            this.getHomesStatus().catch(() => {
+                                this.log.error("Get Home Status was not successful");
+                            });
+                        }, this.config.interval * 60 * 1000);
+                    })
+                    .catch(() => {
+                        this.log.error("Get Home Data was not successful");
+                    });
+            })
+            .catch(() => {
+                this.log.error("Login was not successful");
             });
-        });
 
         this.subscribeStates("*");
         //Delete old room states
         const pre = this.name + "." + this.instance;
         this.getStates(pre + ".*", (err, states) => {
             const allIds = Object.keys(states);
-            allIds.forEach(keyName => {
+            allIds.forEach((keyName) => {
                 if (keyName.indexOf("home.rooms") !== -1 || keyName.indexOf("home.modules") !== -1) {
-                    this.delObject(
-                        keyName
-                            .split(".")
-                            .slice(2)
-                            .join(".")
-                    );
+                    this.delObject(keyName.split(".").slice(2).join("."));
                 }
             });
         });
@@ -76,7 +85,7 @@ class Velux extends utils.Adapter {
                         Authorization: "Basic NTkzMTU0ZGZhMTI3ZDk4MWU3NmJkZTM3OjRlZjg0MWVhMTAxNGYxNGJhMzFmZmFmOGY3ZGE2MTE2",
                         "User-Agent": "Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)",
                         Accept: "application/json",
-                        Host: "app.velux-active.com"
+                        Host: "app.velux-active.com",
                     },
                     form: {
                         app_identifier: "com.velux.active",
@@ -86,9 +95,9 @@ class Velux extends utils.Adapter {
                         password: this.config.password,
                         scope: "velux_scopes",
                         user_prefix: "velux",
-                        username: this.config.user
+                        username: this.config.user,
                     },
-                    followAllRedirects: true
+                    followAllRedirects: true,
                 },
                 (err, resp, body) => {
                     if (err || (resp && resp.statusCode >= 400) || !body) {
@@ -132,13 +141,13 @@ class Velux extends utils.Adapter {
                         Authorization: "Basic NTkzMTU0ZGZhMTI3ZDk4MWU3NmJkZTM3OjRlZjg0MWVhMTAxNGYxNGJhMzFmZmFmOGY3ZGE2MTE2",
                         "User-Agent": "Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)",
                         Accept: "application/json",
-                        Host: "app.velux-active.com"
+                        Host: "app.velux-active.com",
                     },
                     form: {
                         grant_type: "refresh_token",
-                        refresh_token: this.config.rtoken
+                        refresh_token: this.config.rtoken,
                     },
-                    followAllRedirects: true
+                    followAllRedirects: true,
                 },
                 (err, resp, body) => {
                     if (err || resp.statusCode >= 400 || !body) {
@@ -171,15 +180,15 @@ class Velux extends utils.Adapter {
                         "User-Agent": "Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)",
                         Accept: "*/*",
                         "Content-Type": "application/json",
-                        Host: "app.velux-active.com"
+                        Host: "app.velux-active.com",
                     },
 
                     body: {
                         app_type: "app_velux",
-                        app_version: "1.6.1"
+                        app_version: "1.6.1",
                     },
                     json: true,
-                    followAllRedirects: true
+                    followAllRedirects: true,
                 },
                 (err, resp, body) => {
                     if (err || resp.statusCode >= 400 || !body) {
@@ -198,7 +207,7 @@ class Velux extends utils.Adapter {
                             this.config.homeId = body.body.homes[0].id;
                             this.config.bridgeId = body.body.homes[0].modules[0].id;
                             let currentId;
-                            traverse(body.body.homes).forEach(function(value) {
+                            traverse(body.body.homes).forEach(function (value) {
                                 if (this.path.length > 0 && this.isLeaf) {
                                     const modPath = this.path;
 
@@ -230,9 +239,9 @@ class Velux extends utils.Adapter {
                                             role: "indicator",
                                             type: "mixed",
                                             write: false,
-                                            read: true
+                                            read: true,
                                         },
-                                        native: {}
+                                        native: {},
                                     });
                                     adapter.setState("home." + modPath.join("."), value || this.node, true);
                                 } else if (this.path.length > 0 && !isNaN(this.path[this.path.length - 1])) {
@@ -274,15 +283,15 @@ class Velux extends utils.Adapter {
                                             role: "indicator",
                                             type: "mixed",
                                             write: false,
-                                            read: true
+                                            read: true,
                                         },
-                                        native: {}
+                                        native: {},
                                     });
                                 }
                             });
                         }
                         if (body.body && body.body.user) {
-                            Object.keys(body.body.user).forEach(key => {
+                            Object.keys(body.body.user).forEach((key) => {
                                 this.setObjectNotExists("user." + key, {
                                     type: "state",
                                     common: {
@@ -290,9 +299,9 @@ class Velux extends utils.Adapter {
                                         role: "indicator",
                                         type: "mixed",
                                         write: false,
-                                        read: true
+                                        read: true,
                                     },
-                                    native: {}
+                                    native: {},
                                 });
                                 this.setState("user." + key, body.body.user[key], true);
                             });
@@ -319,14 +328,14 @@ class Velux extends utils.Adapter {
                         "User-Agent": "Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)",
                         Accept: "*/*",
                         "Content-Type": "application/json",
-                        Host: "app.velux-active.com"
+                        Host: "app.velux-active.com",
                     },
                     body: {
                         home_id: this.config.homeId,
-                        app_version: "1.6.1"
+                        app_version: "1.6.1",
                     },
                     json: true,
-                    followAllRedirects: true
+                    followAllRedirects: true,
                 },
                 (err, resp, body) => {
                     if (err || resp.statusCode >= 400 || !body) {
@@ -342,7 +351,7 @@ class Velux extends utils.Adapter {
                         this.log.debug(JSON.stringify(body));
                         if (body.body && body.body.home) {
                             let currentId;
-                            traverse(body.body.home).forEach(function(value) {
+                            traverse(body.body.home).forEach(function (value) {
                                 if (this.path.length > 0 && this.isLeaf) {
                                     const modPath = this.path;
                                     this.path.forEach((pathElement, pathIndex) => {
@@ -386,9 +395,9 @@ class Velux extends utils.Adapter {
                                             type: "mixed",
                                             write: true,
                                             read: true,
-                                            unit: unit
+                                            unit: unit,
                                         },
-                                        native: {}
+                                        native: {},
                                     });
                                     if (this.key.indexOf("temperature") !== -1) {
                                         adapter.setState("home." + newPostPath, parseFloat(value) / 10, true);
@@ -421,7 +430,7 @@ class Velux extends utils.Adapter {
                         "User-Agent": "Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)",
                         Accept: "*/*",
                         "Content-Type": "application/json",
-                        Host: "app.velux-active.com"
+                        Host: "app.velux-active.com",
                     },
                     body: {
                         home: {
@@ -430,15 +439,15 @@ class Velux extends utils.Adapter {
                                     force: true,
                                     bridge: this.config.bridgeId,
                                     id: moduleId,
-                                    target_position: targetPosition
-                                }
+                                    target_position: targetPosition,
+                                },
                             ],
-                            id: this.config.homeId
+                            id: this.config.homeId,
                         },
-                        app_version: "1.6.1"
+                        app_version: "1.6.1",
                     },
                     json: true,
-                    followAllRedirects: true
+                    followAllRedirects: true,
                 },
                 (err, resp, body) => {
                     if (err || resp.statusCode >= 400 || !body) {
@@ -493,7 +502,9 @@ class Velux extends utils.Adapter {
                     const modulePath = modulePathArray.join(".");
                     const moduleId = await this.getStateAsync(modulePath + ".id");
                     if (!isNaN(state.val) && moduleId) {
-                        this.setVeluxState(moduleId.val, parseFloat(state.val));
+                        this.setVeluxState(moduleId.val, parseInt(state.val)).catch(() => {
+                            this.log.error("Set Status Failed " + moduleId.val + " " + parseInt(state.val));
+                        });
                     }
                 }
             }
@@ -510,7 +521,7 @@ if (module.parent) {
     /**
      * @param {Partial<ioBroker.AdapterOptions>} [options={}]
      */
-    module.exports = options => new Velux(options);
+    module.exports = (options) => new Velux(options);
 } else {
     // otherwise start the instance directly
     new Velux();

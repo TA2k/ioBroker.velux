@@ -21,7 +21,7 @@ Enter under module your new target_position. Windows allows only target_position
 
 ## Changelog
 
-### 0.0.4
+### 0.0.5
 
 * Improve room assignment
   

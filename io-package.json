@@ -1,9 +1,9 @@
 {
   "common": {
     "name": "velux",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "news": {
-      "0.0.4": {
+      "0.0.5": {
         "en": "improve room assignment"
       },
       "0.0.3": {
