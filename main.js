@@ -503,7 +503,7 @@ class Velux extends utils.Adapter {
                     const moduleId = await this.getStateAsync(modulePath + ".id");
                     if (!isNaN(state.val) && moduleId) {
                         this.setVeluxState(moduleId.val, parseInt(state.val)).catch(() => {
-                            this.log.error("Set Status Failed " + moduleId.val + " " + parseInt(state.val));
+                            this.log.error("Set Status Failed " + moduleId.val + " " + parseFloat(state.val));
                         });
                     }
                 }

@@ -1,8 +1,11 @@
 {
   "common": {
     "name": "velux",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "news": {
+      "0.0.6": {
+        "en": "fix js-controller 3 problem"
+      },
       "0.0.5": {
         "en": "improve room assignment"
       },
