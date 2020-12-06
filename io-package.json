@@ -71,6 +71,8 @@
     "mode": "daemon",
     "type": "household",
     "compact": true,
+    "connectionType": "cloud",
+    "dataSource": "poll",
     "materialize": true,
     "dependencies": [
       {
