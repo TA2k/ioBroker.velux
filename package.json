@@ -6,7 +6,7 @@
     "name": "ta2k",
     "email": "tombox2020@gmail.com"
   },
-  "homepage": "https://github.com/ta2k/ioBroker.velux",
+  "homepage": "https://github.com/TA2k/ioBroker.velux",
   "license": "MIT",
   "keywords": [
     "velux",
@@ -51,7 +51,7 @@
     "lint": "eslint"
   },
   "bugs": {
-    "url": "https://github.com/ta2k/ioBroker.velux/issues"
+    "url": "https://github.com/TA2k/ioBroker.velux/issues"
   },
   "readmeFilename": "README.md"
 }
