@@ -70,6 +70,8 @@
     "loglevel": "info",
     "mode": "daemon",
     "type": "household",
+    "connectionType": "cloud",
+    "dataSource": "poll",
     "compact": true,
     "connectionType": "cloud",
     "dataSource": "poll",
