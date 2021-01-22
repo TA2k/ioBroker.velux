@@ -37,6 +37,10 @@ class Velux extends utils.Adapter {
 
         this.setState("info.connection", false, true);
         // Reset the connection indicator during startup
+        if (this.config.interval && this.config.interval < 1) {
+            this.log.warn("Interval ist zu niedrig. Auf 60sec erhöht um Blocking zu vermeiden.");
+            this.config.interval = 1;
+        }
         this.login()
             .then(() => {
                 this.log.debug("Login successful");
@@ -192,7 +196,7 @@ class Velux extends utils.Adapter {
                 },
                 (err, resp, body) => {
                     if (err || resp.statusCode >= 400 || !body) {
-                        this.log.error(err);
+                        err && this.log.error(err);
                         reject();
                     }
                     try {
@@ -202,8 +206,11 @@ class Velux extends utils.Adapter {
                         }
                         const adapter = this;
 
-                        this.log.debug(body);
+                        this.log.debug(JSON.stringify(body));
                         if (body.body && body.body.homes) {
+                            if (!body.body.homes[0]) {
+                                this.log.warn("No home found");
+                            }
                             this.config.homeId = body.body.homes[0].id;
                             this.config.bridgeId = body.body.homes[0].modules[0].id;
                             let currentId;
@@ -232,18 +239,24 @@ class Velux extends utils.Adapter {
                                             modPath[0] = currentId;
                                         }
                                     }
-                                    adapter.setObjectNotExists("home." + modPath.join("."), {
-                                        type: "state",
-                                        common: {
-                                            name: this.key,
-                                            role: "indicator",
-                                            type: "mixed",
-                                            write: false,
-                                            read: true,
-                                        },
-                                        native: {},
-                                    });
-                                    adapter.setState("home." + modPath.join("."), value || this.node, true);
+                                    adapter
+                                        .setObjectNotExistsAsync("home." + modPath.join("."), {
+                                            type: "state",
+                                            common: {
+                                                name: this.key,
+                                                role: "indicator",
+                                                type: "mixed",
+                                                write: false,
+                                                read: true,
+                                            },
+                                            native: {},
+                                        })
+                                        .then(() => {
+                                            if (typeof value === "object") {
+                                                value = JSON.stringify(value);
+                                            }
+                                            adapter.setState("home." + modPath.join("."), value || this.node, true);
+                                        });
                                 } else if (this.path.length > 0 && !isNaN(this.path[this.path.length - 1])) {
                                     const modPath = this.path;
                                     let keyName;
@@ -292,7 +305,7 @@ class Velux extends utils.Adapter {
                         }
                         if (body.body && body.body.user) {
                             Object.keys(body.body.user).forEach((key) => {
-                                this.setObjectNotExists("user." + key, {
+                                this.setObjectNotExistsAsync("user." + key, {
                                     type: "state",
                                     common: {
                                         name: key,
@@ -302,8 +315,9 @@ class Velux extends utils.Adapter {
                                         read: true,
                                     },
                                     native: {},
+                                }).then(() => {
+                                    this.setState("user." + key, body.body.user[key], true);
                                 });
-                                this.setState("user." + key, body.body.user[key], true);
                             });
                         }
                         resolve();

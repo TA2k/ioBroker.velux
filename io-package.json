@@ -1,8 +1,11 @@
 {
   "common": {
     "name": "velux",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "news": {
+      "0.0.7": {
+        "en": "fix js-controller 3.2 and interval problem"
+      },
       "0.0.6": {
         "en": "fix js-controller 3 problem"
       },
