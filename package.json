@@ -33,7 +33,7 @@
     "test:unit": "mocha test/unit --exit",
     "test:integration": "mocha test/integration --exit",
     "test": "npm run test:js && npm run test:package",
-    "lint": "eslint"
+    "lint": "eslint ."
   },
   "bugs": {
     "url": "https://github.com/TA2k/ioBroker.velux/issues"
