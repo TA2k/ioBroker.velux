@@ -37,10 +37,6 @@ class Velux extends utils.Adapter {
 
     this.setState('info.connection', false, true);
     // Reset the connection indicator during startup
-    if (this.config.interval && this.config.interval < 1) {
-      this.log.warn('Interval ist zu niedrig. Auf 60sec erhöht um Blocking zu vermeiden.');
-      this.config.interval = 1;
-    }
     this.login()
       .then(() => {
         this.log.debug('Login successful');
@@ -86,15 +82,16 @@ class Velux extends utils.Adapter {
           url: 'https://app.velux-active.com/oauth2/token',
           headers: {
             'Accept-Language': 'de-DE;q=1, en-DE;q=0.9',
-            Authorization: 'Basic NTkzMTU0ZGZhMTI3ZDk4MWU3NmJkZTM3OjRlZjg0MWVhMTAxNGYxNGJhMzFmZmFmOGY3ZGE2MTE2',
-            'User-Agent': 'Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)',
+
+            'User-Agent': 'NetatmoApp(VELUX ACTIVE/v791116001/791116001) Android(13/Google/Pixel 7 Pro)',
             Accept: 'application/json',
             Host: 'app.velux-active.com',
           },
+
           form: {
-            app_identifier: 'com.velux.active',
-            device_model: 'iPhone11,2',
-            device_name: 'iPhone 5',
+            app_version: '791116001',
+            client_secret: '6ae2d89d15e767ae5c56b456b452d319',
+            client_id: '5931426da127d981e76bdd3f',
             grant_type: 'password',
             password: this.config.password,
             scope: 'velux_scopes',
@@ -196,7 +193,7 @@ class Velux extends utils.Adapter {
         },
         (err, resp, body) => {
           if (err || resp.statusCode >= 400 || !body) {
-            err && this.log.error(err);
+            this.log.error(err);
             reject();
           }
           try {
@@ -208,9 +205,6 @@ class Velux extends utils.Adapter {
 
             this.log.debug(JSON.stringify(body));
             if (body.body && body.body.homes) {
-              if (!body.body.homes[0]) {
-                this.log.warn('No home found');
-              }
               this.config.homeId = body.body.homes[0].id;
               this.config.bridgeId = body.body.homes[0].modules[0].id;
               let currentId;
@@ -239,24 +233,18 @@ class Velux extends utils.Adapter {
                       modPath[0] = currentId;
                     }
                   }
-                  adapter
-                    .setObjectNotExistsAsync('home.' + modPath.join('.'), {
-                      type: 'state',
-                      common: {
-                        name: this.key,
-                        role: 'indicator',
-                        type: 'mixed',
-                        write: false,
-                        read: true,
-                      },
-                      native: {},
-                    })
-                    .then(() => {
-                      if (typeof value === 'object') {
-                        value = JSON.stringify(value);
-                      }
-                      adapter.setState('home.' + modPath.join('.'), value || this.node, true);
-                    });
+                  adapter.setObjectNotExists('home.' + modPath.join('.'), {
+                    type: 'state',
+                    common: {
+                      name: this.key,
+                      role: 'indicator',
+                      type: 'mixed',
+                      write: false,
+                      read: true,
+                    },
+                    native: {},
+                  });
+                  adapter.setState('home.' + modPath.join('.'), value || this.node, true);
                 } else if (this.path.length > 0 && !isNaN(this.path[this.path.length - 1])) {
                   const modPath = this.path;
                   let keyName;
@@ -305,7 +293,7 @@ class Velux extends utils.Adapter {
             }
             if (body.body && body.body.user) {
               Object.keys(body.body.user).forEach((key) => {
-                this.setObjectNotExistsAsync('user.' + key, {
+                this.setObjectNotExists('user.' + key, {
                   type: 'state',
                   common: {
                     name: key,
@@ -315,9 +303,8 @@ class Velux extends utils.Adapter {
                     read: true,
                   },
                   native: {},
-                }).then(() => {
-                  this.setState('user.' + key, body.body.user[key], true);
                 });
+                this.setState('user.' + key, body.body.user[key], true);
               });
             }
             resolve();
