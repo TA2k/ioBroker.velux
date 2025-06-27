@@ -125,7 +125,7 @@ class Velux extends utils.Adapter {
             this.log.error(error);
             reject();
           }
-        }
+        },
       );
     });
   }
@@ -139,12 +139,17 @@ class Velux extends utils.Adapter {
           url: 'https://app.velux-active.com/oauth2/token',
           headers: {
             'Accept-Language': 'de-DE;q=1, en-DE;q=0.9',
-            Authorization: 'Basic NTkzMTU0ZGZhMTI3ZDk4MWU3NmJkZTM3OjRlZjg0MWVhMTAxNGYxNGJhMzFmZmFmOGY3ZGE2MTE2',
-            'User-Agent': 'Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)',
+            'User-Agent': 'NetatmoApp(VELUX ACTIVE/v791116001/791116001) Android(13/Google/Pixel 7 Pro)',
             Accept: 'application/json',
             Host: 'app.velux-active.com',
           },
+
           form: {
+            app_version: '791116001',
+            client_secret: '6ae2d89d15e767ae5c56b456b452d319',
+            client_id: '5931426da127d981e76bdd3f',
+            scope: 'velux_scopes',
+            user_prefix: 'velux',
             grant_type: 'refresh_token',
             refresh_token: this.config.rtoken,
           },
@@ -164,7 +169,7 @@ class Velux extends utils.Adapter {
             this.log.error(error);
             reject();
           }
-        }
+        },
       );
     });
   }
@@ -312,7 +317,7 @@ class Velux extends utils.Adapter {
             this.log.error(error);
             reject();
           }
-        }
+        },
       );
     });
   }
@@ -414,7 +419,7 @@ class Velux extends utils.Adapter {
             this.log.error(error);
             reject();
           }
-        }
+        },
       );
     });
   }
@@ -468,7 +473,7 @@ class Velux extends utils.Adapter {
             this.log.error(error);
             reject();
           }
-        }
+        },
       );
     });
   }
