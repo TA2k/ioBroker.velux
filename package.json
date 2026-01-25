@@ -9,6 +9,7 @@
   "homepage": "https://github.com/TA2k/ioBroker.velux",
   "license": "MIT",
   "keywords": [
+    "ioBroker",
     "velux",
     "KIX 300"
   ],
