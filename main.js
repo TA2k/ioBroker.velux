@@ -83,13 +83,14 @@ class Velux extends utils.Adapter {
           headers: {
             'Accept-Language': 'de-DE;q=1, en-DE;q=0.9',
 
-            'User-Agent': 'NetatmoApp(VELUX ACTIVE/v791116001/791116001) Android(13/Google/Pixel 7 Pro)',
+            'User-Agent': 'NetatmoApp(VELUX ACTIVE/v791302006/791302006) Android(13/Google/Pixel 7 Pro)',
             Accept: 'application/json',
             Host: 'app.velux-active.com',
           },
 
           form: {
-            app_version: '791116001',
+            app_version: '791302006',
+            version: '791302006',
             client_secret: '6ae2d89d15e767ae5c56b456b452d319',
             client_id: '5931426da127d981e76bdd3f',
             grant_type: 'password',
@@ -104,6 +105,7 @@ class Velux extends utils.Adapter {
           if (err || (resp && resp.statusCode >= 400) || !body) {
             this.log.error(err);
             reject();
+            return;
           }
           this.log.debug(body);
           if (this.refreshTokenInterval) {
@@ -139,13 +141,14 @@ class Velux extends utils.Adapter {
           url: 'https://app.velux-active.com/oauth2/token',
           headers: {
             'Accept-Language': 'de-DE;q=1, en-DE;q=0.9',
-            'User-Agent': 'NetatmoApp(VELUX ACTIVE/v791116001/791116001) Android(13/Google/Pixel 7 Pro)',
+            'User-Agent': 'NetatmoApp(VELUX ACTIVE/v791302006/791302006) Android(13/Google/Pixel 7 Pro)',
             Accept: 'application/json',
             Host: 'app.velux-active.com',
           },
 
           form: {
-            app_version: '791116001',
+            app_version: '791302006',
+            version: '791302006',
             client_secret: '6ae2d89d15e767ae5c56b456b452d319',
             client_id: '5931426da127d981e76bdd3f',
             scope: 'velux_scopes',
@@ -156,15 +159,17 @@ class Velux extends utils.Adapter {
           followAllRedirects: true,
         },
         (err, resp, body) => {
-          if (err || resp.statusCode >= 400 || !body) {
+          if (err || (resp && resp.statusCode >= 400) || !body) {
             this.log.error(err);
             reject();
+            return;
           }
           try {
             this.log.debug(body);
             const tokens = JSON.parse(body);
             this.config.atoken = tokens.access_token;
             this.config.rtoken = tokens.refresh_token;
+            resolve();
           } catch (error) {
             this.log.error(error);
             reject();
@@ -183,7 +188,7 @@ class Velux extends utils.Adapter {
           headers: {
             Authorization: 'Bearer ' + this.config.atoken,
             'Accept-Language': 'de-DE;q=1, en-DE;q=0.9',
-            'User-Agent': 'Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)',
+            'User-Agent': 'NetatmoApp(VELUX ACTIVE/v791302006/791302006) Android(13/Google/Pixel 7 Pro)',
             Accept: '*/*',
             'Content-Type': 'application/json',
             Host: 'app.velux-active.com',
@@ -191,20 +196,22 @@ class Velux extends utils.Adapter {
 
           body: {
             app_type: 'app_velux',
-            app_version: '1.6.1',
+            app_version: '791302006',
           },
           json: true,
           followAllRedirects: true,
         },
         (err, resp, body) => {
-          if (err || resp.statusCode >= 400 || !body) {
+          if (err || (resp && resp.statusCode >= 400) || !body) {
             this.log.error(err);
             reject();
+            return;
           }
           try {
             if (body.error) {
               this.log.error(JSON.stringify(body.error));
               reject();
+              return;
             }
             const adapter = this;
 
@@ -331,27 +338,29 @@ class Velux extends utils.Adapter {
           headers: {
             Authorization: 'Bearer ' + this.config.atoken,
             'Accept-Language': 'de-DE;q=1, en-DE;q=0.9',
-            'User-Agent': 'Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)',
+            'User-Agent': 'NetatmoApp(VELUX ACTIVE/v791302006/791302006) Android(13/Google/Pixel 7 Pro)',
             Accept: '*/*',
             'Content-Type': 'application/json',
             Host: 'app.velux-active.com',
           },
           body: {
             home_id: this.config.homeId,
-            app_version: '1.6.1',
+            app_version: '791302006',
           },
           json: true,
           followAllRedirects: true,
         },
         (err, resp, body) => {
-          if (err || resp.statusCode >= 400 || !body) {
+          if (err || (resp && resp.statusCode >= 400) || !body) {
             this.log.error(err);
             reject();
+            return;
           }
           try {
             if (body.error) {
               this.log.error(JSON.stringify(body.error));
               reject();
+              return;
             }
             const adapter = this;
             this.log.debug(JSON.stringify(body));
@@ -433,7 +442,7 @@ class Velux extends utils.Adapter {
           headers: {
             Authorization: 'Bearer ' + this.config.atoken,
             'Accept-Language': 'de-DE;q=1, en-DE;q=0.9',
-            'User-Agent': 'Velux/1.6.1 (iPhone; iOS 13.3; Scale/3.00)',
+            'User-Agent': 'NetatmoApp(VELUX ACTIVE/v791302006/791302006) Android(13/Google/Pixel 7 Pro)',
             Accept: '*/*',
             'Content-Type': 'application/json',
             Host: 'app.velux-active.com',
@@ -450,15 +459,16 @@ class Velux extends utils.Adapter {
               ],
               id: this.config.homeId,
             },
-            app_version: '1.6.1',
+            app_version: '791302006',
           },
           json: true,
           followAllRedirects: true,
         },
         (err, resp, body) => {
-          if (err || resp.statusCode >= 400 || !body) {
+          if (err || (resp && resp.statusCode >= 400) || !body) {
             this.log.error(err);
             reject();
+            return;
           }
           if (body.error) {
             this.log.error('Request was not successful. The Adapter cannot open windows.');
