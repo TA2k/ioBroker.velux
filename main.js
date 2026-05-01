@@ -45,21 +45,21 @@ class Velux extends utils.Adapter {
           .then(() => {
             this.getHomesStatus()
               .then(() => {})
-              .catch(() => {
-                this.log.error('Get Home Status was not successful');
+              .catch((e) => {
+                this.log.error('Get Home Status was not successful: ' + e);
               });
             this.updateInterval = setInterval(() => {
-              this.getHomesStatus().catch(() => {
-                this.log.error('Get Home Status was not successful');
+              this.getHomesStatus().catch((e) => {
+                this.log.error('Get Home Status was not successful: ' + e);
               });
             }, this.config.interval * 60 * 1000);
           })
-          .catch(() => {
-            this.log.error('Get Home Data was not successful');
+          .catch((e) => {
+            this.log.error('Get Home Data was not successful: ' + e);
           });
       })
-      .catch(() => {
-        this.log.error('Login was not successful');
+      .catch((e) => {
+        this.log.error('Login was not successful: ' + e);
       });
 
     this.subscribeStates('*');
@@ -103,8 +103,9 @@ class Velux extends utils.Adapter {
         },
         (err, resp, body) => {
           if (err || (resp && resp.statusCode >= 400) || !body) {
-            this.log.error(err);
-            reject();
+            const reason = err || (resp && `HTTP ${resp.statusCode}`) || 'empty response';
+            this.log.error('Login request failed: ' + reason);
+            reject(reason);
             return;
           }
           this.log.debug(body);
@@ -124,8 +125,8 @@ class Velux extends utils.Adapter {
             this.config.rtoken = tokens.refresh_token;
             resolve();
           } catch (error) {
-            this.log.error(error);
-            reject();
+            this.log.error('Login parse error: ' + error);
+            reject(error);
           }
         },
       );
@@ -160,8 +161,9 @@ class Velux extends utils.Adapter {
         },
         (err, resp, body) => {
           if (err || (resp && resp.statusCode >= 400) || !body) {
-            this.log.error(err);
-            reject();
+            const reason = err || (resp && `HTTP ${resp.statusCode}`) || 'empty response';
+            this.log.error('Refresh token failed: ' + reason);
+            reject(reason);
             return;
           }
           try {
@@ -171,8 +173,8 @@ class Velux extends utils.Adapter {
             this.config.rtoken = tokens.refresh_token;
             resolve();
           } catch (error) {
-            this.log.error(error);
-            reject();
+            this.log.error('Refresh token parse error: ' + error);
+            reject(error);
           }
         },
       );
@@ -203,14 +205,15 @@ class Velux extends utils.Adapter {
         },
         (err, resp, body) => {
           if (err || (resp && resp.statusCode >= 400) || !body) {
-            this.log.error(err);
-            reject();
+            const reason = err || (resp && `HTTP ${resp.statusCode}`) || 'empty response';
+            this.log.error('getHomesData request failed: ' + reason);
+            reject(reason);
             return;
           }
           try {
             if (body.error) {
-              this.log.error(JSON.stringify(body.error));
-              reject();
+              this.log.error('getHomesData API error: ' + JSON.stringify(body.error));
+              reject(body.error);
               return;
             }
             const adapter = this;
@@ -321,8 +324,8 @@ class Velux extends utils.Adapter {
             }
             resolve();
           } catch (error) {
-            this.log.error(error);
-            reject();
+            this.log.error('getHomesData processing error: ' + error);
+            reject(error);
           }
         },
       );
@@ -352,14 +355,15 @@ class Velux extends utils.Adapter {
         },
         (err, resp, body) => {
           if (err || (resp && resp.statusCode >= 400) || !body) {
-            this.log.error(err);
-            reject();
+            const reason = err || (resp && `HTTP ${resp.statusCode}`) || 'empty response';
+            this.log.error('getHomesStatus request failed: ' + reason);
+            reject(reason);
             return;
           }
           try {
             if (body.error) {
-              this.log.error(JSON.stringify(body.error));
-              reject();
+              this.log.error('getHomesStatus API error: ' + JSON.stringify(body.error));
+              reject(body.error);
               return;
             }
             const adapter = this;
@@ -425,8 +429,8 @@ class Velux extends utils.Adapter {
 
             resolve();
           } catch (error) {
-            this.log.error(error);
-            reject();
+            this.log.error('getHomesStatus processing error: ' + error);
+            reject(error);
           }
         },
       );
@@ -466,22 +470,22 @@ class Velux extends utils.Adapter {
         },
         (err, resp, body) => {
           if (err || (resp && resp.statusCode >= 400) || !body) {
-            this.log.error(err);
-            reject();
+            const reason = err || (resp && `HTTP ${resp.statusCode}`) || 'empty response';
+            this.log.error('setVeluxState request failed: ' + reason);
+            reject(reason);
             return;
           }
           if (body.error) {
-            this.log.error('Request was not successful. The Adapter cannot open windows.');
-            this.log.error(JSON.stringify(body));
-            reject();
+            this.log.error('setVeluxState API error: ' + JSON.stringify(body));
+            reject(body.error);
             return;
           }
           try {
             this.log.info(JSON.stringify(body));
             resolve();
           } catch (error) {
-            this.log.error(error);
-            reject();
+            this.log.error('setVeluxState processing error: ' + error);
+            reject(error);
           }
         },
       );
