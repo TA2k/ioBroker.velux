@@ -47,6 +47,8 @@ Enter under module your new target_position. Windows allows only target_position
 
 - (ta2k) initial release
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 
 MIT License
