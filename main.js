@@ -118,7 +118,7 @@ class Velux extends utils.Adapter {
                 this.refreshToken();
               }, 5 * 60 * 1000);
             });
-          }, 2 * 60 * 60 * 1000); //2hours
+          }, 58  * 60 * 1000); //58
           try {
             const tokens = JSON.parse(body);
             this.config.atoken = tokens.access_token;
