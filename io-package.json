@@ -64,7 +64,10 @@
     },
     "authors": ["ta2k <tombox2020@gmail.com>"],
     "keywords": ["velux", "KIX 300"],
-    "license": "MIT",
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
     "platform": "Javascript/Node.js",
     "main": "main.js",
     "icon": "velux.png",
