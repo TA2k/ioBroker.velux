@@ -19,6 +19,10 @@ Enter under module your new target_position. Windows allows only target_position
 
 ## Changelog
 
+
+### **WORK IN PROGRESS**
+- (ioBroker-Bot) Adapter requires js-controller >= 6.0.11 now.
+
 ### 0.0.9
 
 - Fix login
