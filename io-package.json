@@ -62,8 +62,13 @@
       "pl": "Adapter do Velux",
       "zh-cn": "Velux适配器"
     },
-    "authors": ["ta2k <tombox2020@gmail.com>"],
-    "keywords": ["velux", "KIX 300"],
+    "authors": [
+      "ta2k <tombox2020@gmail.com>"
+    ],
+    "keywords": [
+      "velux",
+      "KIX 300"
+    ],
     "license": "MIT",
     "platform": "Javascript/Node.js",
     "main": "main.js",
@@ -77,14 +82,14 @@
     "connectionType": "cloud",
     "dataSource": "poll",
     "compact": true,
-    "connectionType": "cloud",
-    "dataSource": "poll",
-    "materialize": true,
     "dependencies": [
       {
-        "js-controller": ">=1.4.2"
+        "js-controller": ">=6.0.11"
       }
-    ]
+    ],
+    "adminUI": {
+      "config": "materialize"
+    }
   },
   "native": {
     "user": "",
